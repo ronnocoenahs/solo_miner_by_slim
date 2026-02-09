@@ -1,3 +1,5 @@
+<img src="screenshot.png" alt="Project Screenshot" width="400">
+
 Solo Miner by Slim ⛏️
 
 Solo Miner by Slim is a high-performance, educational Bitcoin miner written in Python. It is designed to run on your CPU and connects directly to the solo.ckpool.org mining pool.
