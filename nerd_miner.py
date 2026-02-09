@@ -18,8 +18,8 @@ import winreg  # Required for "Run at Startup" functionality
 # --- CONFIGURATION ---
 POOL_URL = "solo.ckpool.org"
 POOL_PORT = 3333
-BTC_ADDRESS = "bc1qp2qr5g7r54snhma09qpc46y0m35twvj2k0rwfh"
-WORKER_NAME = "slimpy"
+BTC_ADDRESS = "YOUR_BTC_ADDY"
+WORKER_NAME = "0"
 PASSWORD = "x"
 # ---------------------
 
@@ -565,4 +565,5 @@ if __name__ == "__main__":
             root.mainloop()
         except KeyboardInterrupt:
             for p in processes:
+
                 p.terminate()
