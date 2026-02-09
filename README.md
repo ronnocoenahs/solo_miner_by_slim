@@ -1,14 +1,13 @@
-<img align="left" width="300" height="300" src="screenshot.png" alt="My Image" />
+<img align="left" width="350" height="350" src="screenshot.png" alt="My Image" />
 
-<b>High Performance:</b>
+<b><h3>High Performance:</b></h3>
+
 Uses Python's multiprocessing to utilize every core of your CPU for maximum hashrate.
 
-<b>Real-time tracking of:</b>
+<b><h3>Real-time tracking of:</b></h3>
 
-<i>-Hashrate
-
+<i>
+-Hashrate
 -Network Difficulty
-
 -Total Hashes calculated
-
 -Session Blocks Found</i>
