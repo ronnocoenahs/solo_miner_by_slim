@@ -16,8 +16,8 @@ from datetime import datetime, timedelta
 # --- CONFIGURATION ---
 POOL_URL = "solo.ckpool.org"
 POOL_PORT = 3333
-BTC_ADDRESS = "bc1qp2qr5g7r54snhma09qpc46y0m35twvj2k0rwfh"
-WORKER_NAME = "slimpy"
+BTC_ADDRESS = "YOUR_WALLET"
+WORKER_NAME = "WORKER"
 PASSWORD = "x"
 # ---------------------
 
@@ -405,4 +405,5 @@ if __name__ == "__main__":
             root.mainloop()
         except KeyboardInterrupt:
             for p in processes:
+
                 p.terminate()
