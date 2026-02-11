@@ -11,3 +11,5 @@ Uses Python's multiprocessing to utilize every core of your CPU for maximum hash
 -Network Difficulty
 -Total Hashes calculated
 -Session Blocks Found</i>
+
+Run in cmd or use launch.bat on windows
