@@ -10,16 +10,14 @@ import struct
 import os
 import multiprocessing
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 from datetime import datetime, timedelta
-import urllib.request
-import winreg  # Required for "Run at Startup" functionality
 
 # --- CONFIGURATION ---
 POOL_URL = "solo.ckpool.org"
 POOL_PORT = 3333
-BTC_ADDRESS = "YOUR_BTC_ADDY"
-WORKER_NAME = "0"
+BTC_ADDRESS = "bc1qp2qr5g7r54snhma09qpc46y0m35twvj2k0rwfh"
+WORKER_NAME = "slimpy"
 PASSWORD = "x"
 # ---------------------
 
@@ -252,13 +250,9 @@ class MinerGUI:
         self.shared_job_dict = shared_job_dict
         self.shared_blocks_found = shared_blocks_found
         
-        # Load Config
-        self.config_file = "config.json"
-        self.config = self.load_config()
-
         cpu_count = multiprocessing.cpu_count()
-        self.root.title(f"Solo Miner by Slim")
-        self.root.geometry("500x420")
+        self.root.title(f"Solo Miner by Slim v1.1")
+        self.root.geometry("500x380")
         
         # --- DARK THEME SETUP ---
         bg_color = "#121212"
@@ -275,51 +269,11 @@ class MinerGUI:
         style.configure("TLabel", background=bg_color, foreground=fg_color, font=("Segoe UI", 10))
         style.configure("Stats.TLabel", background=card_bg, foreground=fg_color, font=("Segoe UI", 10))
         style.configure("Header.TLabel", background=bg_color, foreground=accent_color)
+        
         style.configure("Card.TFrame", background=card_bg, relief="flat")
-        
-        # Notebook (Tab) Style
-        style.configure("TNotebook", background=bg_color, borderwidth=0)
-        style.configure("TNotebook.Tab", background="#2C2C2C", foreground="lightgray", padding=[10, 5], borderwidth=0)
-        style.map("TNotebook.Tab", background=[("selected", accent_color)], foreground=[("selected", "#000000")])
-        
-        # Checkbutton Style
-        style.configure("TCheckbutton", background=bg_color, foreground=fg_color, font=("Segoe UI", 10))
-        style.map("TCheckbutton", background=[("active", bg_color)])
 
-        # --- TABS SETUP ---
-        self.notebook = ttk.Notebook(self.root)
-        self.notebook.pack(fill=tk.BOTH, expand=True, padx=0, pady=0)
-        
-        self.mining_frame = ttk.Frame(self.notebook)
-        self.settings_frame = ttk.Frame(self.notebook)
-        
-        self.notebook.add(self.mining_frame, text="  Mining  ")
-        self.notebook.add(self.settings_frame, text="  Settings  ")
-
-        # --- MINING TAB CONTENT ---
-        self.setup_mining_tab(cpu_count)
-
-        # --- SETTINGS TAB CONTENT ---
-        self.setup_settings_tab()
-
-        # Log file setup
-        self.log_file = open("miner_log.txt", "a", encoding="utf-8")
-        self.log_file.write(f"\n--- SESSION START: {datetime.now()} ---\n")
-        self.log_file.flush()
-
-        self.last_hashes = 0
-        self.last_time = time.time()
-        
-        # Initial Global Check
-        self.check_global_stats()
-        
-        # Handle Close Event
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
-        
-        self.update_gui()
-
-    def setup_mining_tab(self, cpu_count):
-        main_frame = ttk.Frame(self.mining_frame, padding="20")
+        # --- LAYOUT ---
+        main_frame = ttk.Frame(root, padding="20")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
         # Cursive Header
@@ -337,7 +291,7 @@ class MinerGUI:
         
         # Row 0: Speed
         ttk.Label(stats_frame, text="Hashrate", style="Stats.TLabel", foreground="gray").grid(row=0, column=0, sticky="w", pady=5)
-        self.lbl_speed = ttk.Label(stats_frame, text="0.00 H/s", style="Stats.TLabel", font=("Segoe UI", 14, "bold"), foreground="#03DAC6")
+        self.lbl_speed = ttk.Label(stats_frame, text="0.00 H/s", style="Stats.TLabel", font=("Segoe UI", 14, "bold"), foreground=accent_color)
         self.lbl_speed.grid(row=0, column=1, sticky="e", pady=5, padx=(20, 0))
         
         # Row 1: Difficulty
@@ -355,138 +309,24 @@ class MinerGUI:
         self.lbl_blocks = ttk.Label(stats_frame, text="0", style="Stats.TLabel", font=("Segoe UI", 12), foreground="#FFD700") # Gold color
         self.lbl_blocks.grid(row=3, column=1, sticky="e", pady=5)
 
-        # Row 4: Global Winners
-        # ttk.Label(stats_frame, text="Global Solo Winners", style="Stats.TLabel", foreground="gray").grid(row=4, column=0, sticky="w", pady=5)
-        # self.lbl_global = ttk.Label(stats_frame, text="Loading...", style="Stats.TLabel", font=("Segoe UI", 12))
-        # self.lbl_global.grid(row=4, column=1, sticky="e", pady=5)
-
-        # Row 5: Cores
-        ttk.Label(stats_frame, text="Active Cores", style="Stats.TLabel", foreground="gray").grid(row=5, column=0, sticky="w", pady=5)
+        # Row 4: Cores
+        ttk.Label(stats_frame, text="Active Cores", style="Stats.TLabel", foreground="gray").grid(row=4, column=0, sticky="w", pady=5)
         self.lbl_cores = ttk.Label(stats_frame, text=f"{cpu_count}", style="Stats.TLabel", font=("Segoe UI", 12))
-        self.lbl_cores.grid(row=5, column=1, sticky="e", pady=5)
+        self.lbl_cores.grid(row=4, column=1, sticky="e", pady=5)
         
         stats_frame.columnconfigure(1, weight=1)
 
-    def setup_settings_tab(self):
-        settings_pad = ttk.Frame(self.settings_frame, padding="20")
-        settings_pad.pack(fill=tk.BOTH, expand=True)
+        # Log file setup
+        self.log_file = open("miner_log.txt", "a", encoding="utf-8")
+        self.log_file.write(f"\n--- SESSION START: {datetime.now()} ---\n")
+        self.log_file.flush()
 
-        ttk.Label(settings_pad, text="General Settings", style="Header.TLabel", font=("Segoe UI", 16, "bold")).pack(anchor="w", pady=(0, 20))
-
-        # Checkboxes
-        self.startup_var = tk.BooleanVar(value=self.config.get('startup', False))
-        self.minimize_var = tk.BooleanVar(value=self.config.get('minimize_on_close', False))
-
-        cb_startup = ttk.Checkbutton(settings_pad, text="Run at Windows Startup", variable=self.startup_var, command=self.toggle_startup)
-        cb_startup.pack(anchor="w", pady=5)
-
-        cb_minimize = ttk.Checkbutton(settings_pad, text="Minimize to Taskbar on Close", variable=self.minimize_var, command=self.save_config)
-        cb_minimize.pack(anchor="w", pady=5)
-
-        # Exit Button
-        btn_frame = ttk.Frame(settings_pad)
-        btn_frame.pack(fill=tk.X, pady=40)
+        self.last_hashes = 0
+        self.last_time = time.time()
         
-        btn_exit = tk.Button(btn_frame, text="STOP MINING & EXIT", bg="#CF6679", fg="white", font=("Segoe UI", 10, "bold"), relief="flat", command=self.quit_app)
-        btn_exit.pack(fill=tk.X, ipady=5)
+        self.update_gui()
 
-    def load_config(self):
-        try:
-            if os.path.exists(self.config_file):
-                with open(self.config_file, 'r') as f:
-                    return json.load(f)
-        except:
-            pass
-        return {'startup': False, 'minimize_on_close': False}
 
-    def save_config(self):
-        self.config['startup'] = self.startup_var.get()
-        self.config['minimize_on_close'] = self.minimize_var.get()
-        try:
-            with open(self.config_file, 'w') as f:
-                json.dump(self.config, f)
-        except Exception as e:
-            print(f"Error saving config: {e}")
-
-    def toggle_startup(self):
-        enabled = self.startup_var.get()
-        self.save_config()
-        
-        # Registry Logic
-        key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
-        app_name = "SlimSoloMiner"
-        try:
-            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_ALL_ACCESS)
-            if enabled:
-                # Use pythonw.exe to run silently
-                exe = sys.executable.replace("python.exe", "pythonw.exe")
-                script = os.path.abspath(__file__)
-                cmd = f'"{exe}" "{script}"'
-                winreg.SetValueEx(key, app_name, 0, winreg.REG_SZ, cmd)
-            else:
-                try:
-                    winreg.DeleteValue(key, app_name)
-                except FileNotFoundError:
-                    pass
-            winreg.CloseKey(key)
-        except Exception as e:
-            messagebox.showerror("Registry Error", f"Could not update startup settings:\n{e}")
-            # Revert checkbox if failed
-            self.startup_var.set(not enabled)
-
-    def on_closing(self):
-        if self.minimize_var.get():
-            self.root.iconify()
-        else:
-            self.quit_app()
-
-    def quit_app(self):
-        self.root.destroy()
-        sys.exit(0)
-
-    def check_global_stats(self):
-        """Checks for global solo winners in a separate thread, respecting weekly cache."""
-        threading.Thread(target=self._fetch_stats_thread, daemon=True).start()
-
-    def _fetch_stats_thread(self):
-        cache_file = "winner_cache.json"
-        data = {}
-        need_fetch = True
-
-        # 1. Try to load from cache
-        if os.path.exists(cache_file):
-            try:
-                with open(cache_file, "r") as f:
-                    data = json.load(f)
-                    last_check = datetime.fromisoformat(data.get("last_checked", "2000-01-01"))
-                    if datetime.now() - last_check < timedelta(days=7):
-                        need_fetch = False
-                        # Update UI with cached data
-                        self.root.after(0, lambda: self.lbl_global.config(text=f"{data.get('count', 'Unknown')}"))
-            except:
-                pass
-
-        # 2. Fetch if needed
-        if need_fetch:
-            try:
-                # Fetch from ckpool stats API
-                url = "https://solo.ckpool.org/pool/pool.status"
-                with urllib.request.urlopen(url, timeout=10) as response:
-                    stats = json.loads(response.read().decode())
-                    # 'soloblocks' is usually the field for total blocks found by the pool
-                    count = stats.get("soloblocks", "N/A")
-                    
-                    # Update UI
-                    self.root.after(0, lambda: self.lbl_global.config(text=f"{count}"))
-                    
-                    # Save to cache
-                    with open(cache_file, "w") as f:
-                        json.dump({
-                            "count": count,
-                            "last_checked": datetime.now().isoformat()
-                        }, f)
-            except Exception as e:
-                self.root.after(0, lambda: self.lbl_global.config(text="Connection Error"))
 
     def update_gui(self):
         # 1. Drain Queue to File
@@ -565,5 +405,4 @@ if __name__ == "__main__":
             root.mainloop()
         except KeyboardInterrupt:
             for p in processes:
-
                 p.terminate()
